@@ -251,50 +251,19 @@ class Assembler(object):
         return d_label, directive, d_args
 
     def process(self):
-        if self.mnemonic == self.op1 == self.op2 == "":
+        if not self.mnemonic and not self.op1 and self.op2:
             self.pass_action(0, b"")
             return
+        
+        mnemonic = f"_{self.mnemonic}"
+        mnemonic = self.mnemonic.replace("_.", "directive_")
+        
+        if hasattr(self, mnemonic):
+            getattr(self, mnemonic)()
+            return
+        self.write_error(f'Unrecognized mnemonic "{self.mnemonic}"')
 
-        if self.mnemonic == "mv":
-            self.mv()
-        elif self.mnemonic == "io":
-            self.io()
-        elif self.mnemonic == "push":
-            self.push()
-        elif self.mnemonic == "pop":
-            self.pop()
-        elif self.mnemonic == "add":
-            self.add()
-        elif self.mnemonic == "sub":
-            self.sub()
-        elif self.mnemonic == "inc":
-            self.inc()
-        elif self.mnemonic == "dec":
-            self.dec()
-        elif self.mnemonic == "and":
-            self.mnemonic_and()
-        elif self.mnemonic == "or":
-            self.mnemonic_or()
-        elif self.mnemonic == "not":
-            self.mnemonic_not()
-        elif self.mnemonic == "cmp":
-            self.cmp()
-        elif self.mnemonic == "call":
-            self.call()
-        elif self.mnemonic == "jnz":
-            self.jnz()
-        elif self.mnemonic == "ret":
-            self.ret()
-        elif self.mnemonic == "hlt":
-            self.hlt()
-        elif self.mnemonic == ".data":
-            self.directive_data()
-        elif self.mnemonic == ".string":
-            self.directive_string()
-        else:
-            self.write_error(f'Unrecognized mnemonic "{self.mnemonic}"')
-
-    def mv(self):
+    def _mv(self):
         self.verify_ops(self.op1 != "" and self.op2 != "")
         # 0x00 = 0
         opcode = 0
@@ -304,7 +273,7 @@ class Assembler(object):
         self.immediate_operand()
         self.memory_address()
 
-    def io(self):
+    def _io(self):
         self.verify_ops(self.op1 != "" and self.op2 != "")
         if self.op1_type == 'imm' and (self.op2 == 'in' or self.op2 == 'IN'):
             self.write_error("Cannot read word into an immediate.")
@@ -323,7 +292,7 @@ class Assembler(object):
         self.immediate_operand()
         self.memory_address()
 
-    def push(self):
+    def _push(self):
         self.verify_ops(self.op1 != "" and self.op2 == "")
         # 0x02 = 2
         opcode = 2
@@ -333,7 +302,7 @@ class Assembler(object):
         self.immediate_operand()
         self.memory_address()
 
-    def pop(self):
+    def _pop(self):
         self.verify_ops(self.op1 != "" and self.op2 == "")
         # 0x03 = 3
         opcode = 3
@@ -342,7 +311,7 @@ class Assembler(object):
         self.pass_action(2, opcode.to_bytes(2, byteorder="little"))
         self.memory_address()
 
-    def add(self):
+    def _add(self):
         self.verify_ops(self.op1 != "" and self.op2 != "")
         # 0x04 = 4
         opcode = 4
@@ -351,7 +320,7 @@ class Assembler(object):
         self.immediate_operand()
         self.memory_address()
 
-    def sub(self):
+    def _sub(self):
         self.verify_ops(self.op1 != "" and self.op2 != "")
         # 0x05 = 5
         opcode = 5
@@ -360,21 +329,21 @@ class Assembler(object):
         self.immediate_operand()
         self.memory_address()
 
-    def inc(self):
+    def _inc(self):
         self.verify_ops(self.op1 != "" and self.op2 == "")
         # 0x06 = 6
         opcode = 6
         opcode = self.encode_operand_types(opcode, 1)
         self.pass_action(2, opcode.to_bytes(2, byteorder="little"))
 
-    def dec(self):
+    def _dec(self):
         self.verify_ops(self.op1 != "" and self.op2 == "")
         # 0x07 = 7
         opcode = 7
         opcode = self.encode_operand_types(opcode, 1)
         self.pass_action(2, opcode.to_bytes(2, byteorder="little"))
 
-    def mnemonic_and(self):
+    def _and(self):
         self.verify_ops(self.op1 != "" and self.op2 != "")
         # 0x08 = 8
         opcode = 8
@@ -383,7 +352,7 @@ class Assembler(object):
         self.immediate_operand()
         self.memory_address()
 
-    def mnemonic_or(self):
+    def _or(self):
         self.verify_ops(self.op1 != "" and self.op2 != "")
         # 0x08 = 9
         opcode = 9
@@ -392,7 +361,7 @@ class Assembler(object):
         self.immediate_operand()
         self.memory_address()
 
-    def mnemonic_not(self):
+    def _not(self):
         self.verify_ops(self.op1 != "" and self.op2 != "")
         # 0x0A = 10
         opcode = 10
@@ -401,7 +370,7 @@ class Assembler(object):
         self.immediate_operand()
         self.memory_address()
 
-    def cmp(self):
+    def _cmp(self):
         self.verify_ops(self.op1 != "" and self.op2 != "")
         # 0x0B = 11
         opcode = 11
@@ -410,7 +379,7 @@ class Assembler(object):
         self.immediate_operand()
         self.memory_address()
 
-    def call(self):
+    def _call(self):
         self.verify_ops(self.op1 != "" and self.op2 == "")
         # 0x0C = 12
         opcode = 12
@@ -418,19 +387,19 @@ class Assembler(object):
         self.pass_action(2, opcode.to_bytes(2, byteorder="little"))
         self.immediate_operand()
 
-    def jnz(self):
+    def _jnz(self):
         self.verify_ops(self.op1 != "" and self.op2 == "")
         opcode = 13
         opcode = self.encode_operand_types(opcode, 1)
         self.pass_action(2, opcode.to_bytes(2, byteorder="little"))
         self.immediate_operand()
 
-    def ret(self):
+    def _ret(self):
         self.verify_ops(self.op1 == "" and self.op2 == "")
         # 0x0E = 14
         self.pass_action(2, b"\x00\xE0")
 
-    def hlt(self):
+    def _hlt(self):
         self.verify_ops(self.op1 == self.op2 == "")
         self.pass_action(2, b"\x00\xF0")
 
