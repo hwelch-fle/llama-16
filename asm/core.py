@@ -429,35 +429,44 @@ class Assembler(object):
         self.pass_action(len(data), data)
 
     def encode_operand_types(self, opcode, num_ops):
-        opcode = opcode << 12
-        if self.op1_type == "imm":
-            opcode += (14 << 4)
-        elif self.op1_type == "reg":
-            opcode += (self.register_offset(self.op1) << 4)
-        elif self.op1_type == "mem_adr" or self.op1_type == "label":
-            if self.debug_mode:
-                print(f"DEBUG: Symbol table: {self.symbol_table}")
-            opcode += (15 << 4)
-        elif self.op2_type == "":
-            pass
-        else:
-            self.write_error(f'Invalid operand "{self.op1}"')
-
+        opcode <<= 12
+        
         if num_ops == 1:
-            return opcode
-
-        if self.op2_type == "reg":
-            opcode += (self.register_offset(self.op2))
-        elif self.op2_type == "mem_adr" or self.op2_type == "label":
-            if self.debug_mode:
-                print(f"DEBUG: Symbol table: {self.symbol_table}")
-            opcode += 15
-        elif self.op2_type == "":
-            pass
-        else:
-            self.write_error(f'Invalid operand "{self.op2}"')
+            match self.op1_type:
+                case "imm":
+                    opcode += (14 << 4)
+                    
+                case "reg":
+                    opcode += (self.register_offset(self.op1) << 4)
+                
+                case "mem_adr" | "label":
+                    opcode += (15 << 4)
+                    if self.debug_mode:
+                        print(f"DEBUG: Symbol table: {self.symbol_table}")
+                
+                case "":
+                    pass
+                
+                case _:
+                    self.write_error(f'Invalid operand "{self.op1}"')
+        
+        elif num_ops == 2:
+            match self.op2_type:
+                case "reg":
+                    opcode += (self.register_offset(self.op2))
+                
+                case "mem_adr" | "label":
+                    opcode += (15 << 4)
+                    if self.debug_mode:
+                        print(f"DEBUG: Symbol table: {self.symbol_table}")
+                
+                case "":
+                    pass
+                
+                case _:
+                    self.write_error(f'Invalid operand "{self.op2}"')
         return opcode
-
+    
     def immediate_operand(self):
         # This function also handles LABEL operands. Should this be its own function
         # for ease of readablity and debugging?
