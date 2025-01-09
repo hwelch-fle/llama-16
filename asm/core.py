@@ -520,24 +520,11 @@ class Assembler(object):
             if self.pass_number == 2:
                 self.pass_action(2, number.to_bytes(2, byteorder="little"))
 
-    def register_offset(self, reg_in):
+    def register_offset(self, reg_in: str):
         reg = reg_in.lower()
-        if reg == "a":
-            return 0
-        elif reg == "b":
-            return 1
-        elif reg == "c":
-            return 2
-        elif reg == "d":
-            return 3
-        elif reg == "ip":
-            return 4
-        elif reg == 'sp':
-            return 5
-        elif reg == 'bp':
-            return 6
-        else:
+        if reg not in self.registers:
             self.write_error(f'Invalid register "{reg}"')
+        return self.registers.index(reg)
 
     def verify_ops(self, valid):
         if not valid:
