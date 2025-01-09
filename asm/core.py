@@ -16,6 +16,8 @@ class Assembler(object):
     op1_type, op2_type, comment = "", "", ""
     symbol_table = {}
 
+    registers = ("a", "b", "c", "d", "ip", "sp", "bp")
+    
     def __init__(self):
         start_time = time.time()
         description = "LLAMA-16 Assembler"
