@@ -468,33 +468,18 @@ class Assembler(object):
         
     
     def memory_address(self):
-        if self.op1_type == "mem_adr":
-            operand = self.op1
-            self.address += 1
+        if self.pass_number == 1 or not any(op == 'mem_adr' for op in (self.op1_type, self.op2_type)):
+            return
+        
+        self.address += 1
 
-            if operand[0].isdigit():
-                number = int(operand, 16)
-            else:
-                number = self.symbol_table.get(operand.lower(), -1)
-                if self.pass_number == 2 and number < 0:
-                    self.write_error(f"Undefined label \"{operand}\"")
+        for op_typ, op in zip((self.op1_type, self.op2_type), (self.op1, self.op2)):
+            if op_typ != 'mem_adr':
+                continue
 
-            if self.pass_number == 2:
-                self.pass_action(2, number.to_bytes(2, byteorder="little"))
-
-        if self.op2_type == "mem_adr":
-            operand = self.op2
-            self.address += 1
-
-            if operand[0].isdigit():
-                number = int(operand, 16)
-            else:
-                number = self.symbol_table.get(operand.lower(), -1)
-                if self.pass_number == 2 and number < 0:
-                    self.write_error(f"Undefined label \"{operand}\"")
-
-            if self.pass_number == 2:
-                self.pass_action(2, number.to_bytes(2, byteorder="little"))
+            number = self.to_int(op) or self.get_label(op)
+            number = int(number, 16)
+            self.pass_action(2, number.to_bytes(2, byteorder="little"))
 
     def register_offset(self, reg_in: str):
         reg = reg_in.lower()
