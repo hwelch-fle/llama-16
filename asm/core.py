@@ -504,15 +504,16 @@ class Assembler(object):
             size: Number of bytes in the instruction
             output_byte: Opcode, empty binary is no output generated
         """
-        align = size % 2
+        if not output_byte:
+            return
 
         if self.pass_number == 1:
+            align = size % 2
             if self.label:
                 self.add_label()
             self.address += int(size/2) + align
-        else:
-            if output_byte != b"":
-                self.output += output_byte
+
+        self.output += output_byte
 
     def add_label(self):
         """Add label to symbol table."""
