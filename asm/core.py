@@ -217,10 +217,10 @@ class Assembler(object):
         d_label, directive, d_args = "", "", ""
         left1, sep1, right1 = line.partition(".data")
         d_type = ".data"
-        if sep1 == "":
+        if not sep1:
             left1, sep1, right1 = line.partition(".string")
             d_type = ".string"
-        if sep1 == "":
+        if not sep1:
             return d_label, directive, d_args
 
         directive = d_type
@@ -461,9 +461,7 @@ class Assembler(object):
             return
         
         self.address += 1
-
         number = self.to_int(self.op1) or self.get_label(self.op1)
-
         self.pass_action(2, number.to_bytes(2, byteorder="little", signed=True))
         
     
