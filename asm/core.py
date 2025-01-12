@@ -22,6 +22,7 @@ class Assembler(object):
         start_time = time.time()
         description = "LLAMA-16 Assembler"
         parser = argparse.ArgumentParser(description=description)
+
         parser.add_argument("filename",
                             default="",
                             help="input source file")
@@ -38,34 +39,23 @@ class Assembler(object):
                             help="print extra debugging information")
         args = parser.parse_args()
 
-        if args.debug:
-            self.debug_mode = True
+        self.debug_mode = args.debug
+        
+        self.assemble(line for line in open(Path(args.filename)))
 
-        infile = Path(args.filename)
-        with open(infile, "r") as file:
-            lines = file.readlines()
+        # Process outfile and symfile in one line each
+        outfile = Path(args.outfile or args.filename).with_suffix('.OUT')
+        symfile = outfile.with_suffix(".SYM") if args.symab else None
 
-        if args.outfile:
-            outfile = Path(args.outfile).with_suffix(".OUT")
-            if args.symtab:
-                symfile = Path(args.outfile).with_suffix(".SYM")
-        else:  # no outfile
-            outfile = Path(args.filename).with_suffix(".OUT")
-            if args.symtab:
-                symfile = Path(args.filename).with_suffix(".SYM")
-
-        self.assemble(lines)
         bytes_written = self.write_binary_file(outfile, self.output)
-        if args.symtab:
-            symbol_count = self.write_symbol_file(symfile, self.symbol_table)
+        symbol_count = symfile and self.write_symbol_file(symfile, self.symbol_table)
 
-        if args.debug:
+        if self.debug_mode:
             print(f"Writing {bytes_written} bytes to {Path(outfile)}")
-            if args.symtab:
-                print(f"Writing {symbol_count} symbols to {Path(symfile)}")
-            print("--- Finished in %.4f seconds ---" % (time.time() - start_time))
+            print(f"Writing {symbol_count} symbols to {Path(symfile)}"*bool(symfile))
+            print(f"--- Finished in {(time.time() - start_time):.4f} seconds ---")
 
-    def write_binary_file(self, filename, binary_data):
+    def write_binary_file(self, filename: Path, binary_data: bytearray) -> int:
         with open(filename, "wb") as file:
             if self.debug_mode:
                 print(f'DEBUG binary output: {binary_data}')
