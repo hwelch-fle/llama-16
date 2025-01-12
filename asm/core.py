@@ -119,14 +119,11 @@ class Assembler(object):
             comment_left = comment_right.rstrip()
 
         d_label, directive, d_args = self.parse_directive(comment_left)
-        if directive != "":
+        if directive:
             self.label = d_label.lower()
-            self.mnemonic = directive
-            self.op1 = d_args
-            if directive == ".data":
-                self.op1_type = "data"
-            if directive == ".string":
-                self.op1_type = "string"
+            self.mnemonic = directive.lower()
+            self.op1 = d_args.lower()
+            self.op1_type = directive.split('.')[0] # drop the .
 
             if self.debug_mode:
                 print(f'Label: {self.label}\nMnemonic: {self.mnemonic}\nOp1: {self.op1}\nOp1 Type: {self.op1_type}\n'
