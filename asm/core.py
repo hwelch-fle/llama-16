@@ -99,7 +99,7 @@ class Assembler(object):
             # reach end of file
             pass
 
-    def parse(self, line):
+    def parse(self, line: str):
         """Parse and tokenize line of source code."""
         # Based on this algorithm from Brian Robert Callahan:
         # https://briancallahan.net/blog/20210410.html
@@ -213,7 +213,7 @@ class Assembler(object):
             self.comment,
         )
 
-    def parse_directive(self, line):
+    def parse_directive(self, line: str):
         d_label, directive, d_args = "", "", ""
         left1, sep1, right1 = line.partition(".data")
         d_type = ".data"
@@ -417,7 +417,7 @@ class Assembler(object):
         data = bytes(string, encoding='utf-8')
         self.pass_action(len(data), data)
 
-    def encode_operand_types(self, opcode, num_ops):
+    def encode_operand_types(self, opcode, num_ops) -> int:
         opcode <<= 12
         
         if num_ops == 1:
@@ -481,7 +481,7 @@ class Assembler(object):
             number = int(number, 16)
             self.pass_action(2, number.to_bytes(2, byteorder="little"))
 
-    def register_offset(self, reg_in: str):
+    def register_offset(self, reg_in: str) -> int:
         reg = reg_in.lower()
         if reg not in self.registers:
             self.write_error(f'Invalid register "{reg}"')
