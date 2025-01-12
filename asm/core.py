@@ -458,28 +458,15 @@ class Assembler(object):
         return opcode
     
     def immediate_operand(self):
-        # This function also handles LABEL operands. Should this be its own function
-        # for ease of readablity and debugging?
-        if self.op1_type not in ("imm", "label"):
+        if self.op1_type not in ("imm", "label") or self.pass_number == 1:
             return
+        
         self.address += 1
+
+        number = self.to_int(self.op1) or self.get_label(self.op1)
+
+        self.pass_action(2, number.to_bytes(2, byteorder="little", signed=True))
         
-        # Convert input to integer (or None)
-        number = int(self.op1) if self.op1.isdigit() or self.op1.startswith("-") else None
-        
-        # If the operand is a label, look up the value in the symbol table
-        if self.pass_number == 2 and not number:
-            # If the operand is a valid label, look up the value in the symbol table otherwise it is None
-            number = int(self.symbol_table[self.op1.lower()]) if self.op1.lower() in self.symbol_table else None
-            if not number:
-                self.write_error(f'Undefined label "{self.op1}"')
-        
-        # If the operand is not a number and is not in the symbol table, it is invalid
-        elif not number:
-            self.write_error(f"Invalid immediate value: {self.op1}")
-        
-        if self.pass_number == 2 and number:
-            self.pass_action(2, number.to_bytes(2, byteorder="little", signed=True))
     
     def memory_address(self):
         if self.op1_type == "mem_adr":
@@ -550,6 +537,15 @@ class Assembler(object):
             self.write_error(f'Duplicate label: "{self.label}"')
         self.symbol_table[symbol] = self.address + self.ORIGIN
 
+    def get_label(self, label: str) -> int:
+        if label.lower() in self.symbol_table:
+            return int(self.symbol_table[label])
+        self.write_error(f'Undefined label "{label}"')
+
+    def to_int(self, val: str) -> int | None:
+        if val.isdigit() or val.startswith('-'):
+            return int(val)
+        return None
 
 if __name__ == "__main__":
     assembler = Assembler()
