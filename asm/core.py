@@ -219,17 +219,16 @@ class Assembler(object):
         return d_label, directive, d_args
 
     def process(self):
-        if not self.mnemonic and not self.op1 and self.op2:
-            self.pass_action(0, b"")
+        if not self.mnemonic and not (self.op1 and self.op2):
             return
         
-        mnemonic = f"_{self.mnemonic}"
-        mnemonic = self.mnemonic.replace("_.", "directive_")
+        # Internal mnemonic format
+        mnemonic = f"_{self.mnemonic}".replace("_.", "directive_")
         
-        if hasattr(self, mnemonic):
-            getattr(self, mnemonic)()
-            return
-        self.write_error(f'Unrecognized mnemonic "{self.mnemonic}"')
+        if not hasattr(self, mnemonic):
+            self.write_error(f'Unrecognized mnemonic "{self.mnemonic}"')
+
+        getattr(self, mnemonic)()
 
     def _mv(self):
         self.verify_ops(self.op1 and self.op2)
