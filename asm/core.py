@@ -184,7 +184,7 @@ class Assembler(object):
             elif self.op1.startswith("#"):
                 self.op1_type = "imm"
                 self.op1 = self.op1.translate({35: None})  # Remove number sign
-            elif self.op1 in ["a", "A", "b", "B", "c", "C", "d", "D"]:
+            elif self.op1 in self.registers[0:4]:
                 self.op1_type = "reg"
                 self.op1.lower()
             else:
