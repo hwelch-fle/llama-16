@@ -2,7 +2,7 @@
 import sys
 import argparse
 from mem import LLAMAMemory
-from cpu import LLAMACpu, CpuHalted
+from cpu import LLAMACPU, CpuHalted
 
 
 class Emulator(object):
@@ -24,7 +24,7 @@ class Emulator(object):
 
         self.memory = LLAMAMemory()
         self.memory.load_program(args.program)
-        self.cpu = LLAMACpu(self.memory, self.debug_mode)
+        self.cpu = LLAMACPU(self.memory, self.debug_mode)
 
         try:
             while True:

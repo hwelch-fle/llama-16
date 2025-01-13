@@ -17,7 +17,7 @@ class CpuHalted(Exception):
     pass
 
 
-class LLAMACpu(object):
+class LLAMACPU:
     debug_mode = False
 
     def __init__(self, memory, debug_mode=False):
