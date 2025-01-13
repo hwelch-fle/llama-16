@@ -1,4 +1,5 @@
 import ctypes
+from mem import LLAMAMemory
 
 IP_START = 0x4000
 SP_START = 0xDFC0
@@ -20,7 +21,7 @@ class CpuHalted(Exception):
 class LLAMACPU:
     debug_mode = False
 
-    def __init__(self, memory, debug_mode=False):
+    def __init__(self, memory: LLAMAMemory, debug_mode=False):
         if debug_mode:
             self.debug_mode = True
         self.memory = memory
