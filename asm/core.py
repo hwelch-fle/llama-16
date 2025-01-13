@@ -404,40 +404,41 @@ class Assembler(object):
     def encode_operand_types(self, opcode, num_ops) -> int:
         opcode <<= 12
         
-        if num_ops == 1:
-            match self.op1_type:
-                case "imm":
-                    opcode += (14 << 4)
-                    
-                case "reg":
-                    opcode += (self.register_offset(self.op1) << 4)
+        # num_ops == 1, match op1 type
+        match (self.op1_type, num_ops):
+            case "imm", 1:
+                opcode += (14 << 4)
                 
-                case "mem_adr" | "label":
-                    opcode += (15 << 4)
-                    if self.debug_mode:
-                        print(f"DEBUG: Symbol table: {self.symbol_table}")
-                
-                case "":
-                    pass
-                
-                case _:
-                    self.write_error(f'Invalid operand "{self.op1}"')
+            case "reg":
+                opcode += (self.register_offset(self.op1) << 4)
+            
+            case "mem_adr" | "label", 1:
+                opcode += (15 << 4)
+                if self.debug_mode:
+                    print(f"DEBUG: Symbol table: {self.symbol_table}")
+            
+            case "", 1:
+                pass
+            
+            case _, 1:
+                self.write_error(f'Invalid operand "{self.op1}"')
         
-        elif num_ops == 2:
-            match self.op2_type:
-                case "reg":
-                    opcode += (self.register_offset(self.op2))
-                
-                case "mem_adr" | "label":
-                    opcode += (15 << 4)
-                    if self.debug_mode:
-                        print(f"DEBUG: Symbol table: {self.symbol_table}")
-                
-                case "":
-                    pass
-                
-                case _:
-                    self.write_error(f'Invalid operand "{self.op2}"')
+        # num_ops == 2, match op2 type
+        match (self.op2_type, num_ops):
+            case "reg", 2:
+                opcode += (self.register_offset(self.op2))
+            
+            case "mem_adr" | "label", 2:
+                opcode += (15 << 4)
+                if self.debug_mode:
+                    print(f"DEBUG: Symbol table: {self.symbol_table}")
+            
+            case "", 2:
+                pass
+            
+            case _, 2:
+                self.write_error(f'Invalid operand "{self.op2}"')
+        
         return opcode
     
     def immediate_operand(self):
