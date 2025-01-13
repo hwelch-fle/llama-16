@@ -127,15 +127,6 @@ class Assembler(object):
             if self.debug_mode:
                 print(f'Label: {self.label}\nMnemonic: {self.mnemonic}\nOp1: {self.op1}\nOp1 Type: {self.op1_type}\n'
                       f'Op2: {self.op2}\nOp2 Type: {self.op2_type}\nComment: {self.comment}\n')
-            return (
-                self.label,
-                self.mnemonic,
-                self.op1,
-                self.op1_type,
-                self.op2,
-                self.op2_type,
-                self.comment,
-            )
 
         # Second operand
         op2_left, op2_separator, op2_right = comment_left.rpartition(",")
@@ -202,15 +193,6 @@ class Assembler(object):
             print(f'Label: {self.label}\nMnemonic: {self.mnemonic}\nOp1: {self.op1}\nOp1 Type: {self.op1_type}\n'
                   f'Op2: {self.op2}\nOp2 Type: {self.op2_type}\nComment: {self.comment}\n')
 
-        return (
-            self.label,
-            self.mnemonic,
-            self.op1,
-            self.op1_type,
-            self.op2,
-            self.op2_type,
-            self.comment,
-        )
 
     def parse_directive(self, line: str):
         d_label, directive, d_args = "", "", ""
