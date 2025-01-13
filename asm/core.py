@@ -48,7 +48,8 @@ class Assembler(object):
         args = AssemblerConfig(description)
         self.debug_mode = args.debug
         
-        self.assemble(line for line in open(Path(args.filename)))
+        self.assemble(line for line in open(Path(args.filename))) # Pass 1
+        self.assemble(line for line in open(Path(args.filename))) # Pass 2
 
         # Process outfile and symfile in one line each
         outfile = Path(args.outfile or args.filename).with_suffix('.OUT')
@@ -81,30 +82,21 @@ class Assembler(object):
         return symbol_count
 
     def assemble(self, lines):
-        self.pass_number = 1
-        try:
-            for line_number, line in enumerate(lines):
-                if self.debug_mode:
-                    print(f"Line number is {self.line_number}")
-                self.parse(line)
-                self.process()
-                self.line_number += 1
-        except StopIteration:
-            # reach end of file
-            pass
+        self.pass_number = 1 if not hasattr(self, 'pass_number') else self.pass_number+1
+        
+        [
+            self._assemble_line(line)
+            for line in lines
+        ]
 
-        self.pass_number = 2
-        self.line_number = 0
-        try:
-            for line_number, line in enumerate(lines):
-                if self.debug_mode:
-                    print(f"Line number is {self.line_number}")
-                self.parse(line)
-                self.process()
-                self.line_number += 1
-        except StopIteration:
-            # reach end of file
-            pass
+        if self.debug_mode:
+            print(f'Parsed {self.line_number} lines on pass {self.pass_number}')
+        
+    def _assemble_line(self, line: str):
+        """Assembly function for each line (parse -> process)"""
+        self.parse(line)
+        self.process()
+        self.line_number += 1
 
     def parse(self, line: str):
         """Parse and tokenize line of source code."""
