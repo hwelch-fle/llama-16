@@ -4,23 +4,8 @@ import sys
 import time
 from pathlib import Path
 
-
-class Assembler(object):
-    line_number, pass_number, address = 0, 1, 0
-    output = b""
-    debug_mode = False
-    ORIGIN = 0x4000
-
-    # the tokens per line
-    label, mnemonic, op1, op2, comment = "", "", "", "", ""
-    op1_type, op2_type, comment = "", "", ""
-    symbol_table = {}
-
-    registers = ("a", "b", "c", "d", "ip", "sp", "bp")
-    
-    def __init__(self):
-        start_time = time.time()
-        description = "LLAMA-16 Assembler"
+class AssemblerConfig:
+    def __init__(self, description):
         parser = argparse.ArgumentParser(description=description)
 
         parser.add_argument("filename",
@@ -39,6 +24,28 @@ class Assembler(object):
                             help="print extra debugging information")
         args = parser.parse_args()
 
+        self.filename: str = args.filename
+        self.outfile: str = args.outfile
+        self.symtab: bool = args.symtab
+        self.debug: bool = args.debug
+
+class Assembler(object):
+    line_number, pass_number, address = 0, 1, 0
+    output = b""
+    debug_mode = False
+    ORIGIN = 0x4000
+
+    # the tokens per line
+    label, mnemonic, op1, op2, comment = "", "", "", "", ""
+    op1_type, op2_type, comment = "", "", ""
+    symbol_table = {}
+
+    registers = ("a", "b", "c", "d", "ip", "sp", "bp")
+    
+    def __init__(self):
+        start_time = time.time()
+        description = "LLAMA-16 Assembler"
+        args = AssemblerConfig(description)
         self.debug_mode = args.debug
         
         self.assemble(line for line in open(Path(args.filename)))
