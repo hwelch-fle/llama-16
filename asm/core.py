@@ -72,7 +72,7 @@ class Assembler(object):
 
     def write_symbol_file(self, filename, table):
         symbol_count = len(table)
-        if symbol_count == 0:
+        if not symbol_count:
             return symbol_count
 
         with open(filename, "w", encoding="utf-8") as file:
