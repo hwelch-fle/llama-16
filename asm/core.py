@@ -160,6 +160,8 @@ class Assembler(object):
             self.mnemonic = self.op1.strip()
             self.op1 = ""
 
+        self.op1 = self.op1.lower()
+
         if self.op1:
             if self.op1.startswith("["):
                 self.op1_type = "mem_adr"
@@ -169,10 +171,12 @@ class Assembler(object):
                 self.op1 = self.op1.translate({35: None})  # Remove number sign
             elif self.op1 in self.registers[0:4]:
                 self.op1_type = "reg"
-                self.op1.lower()
+                self.op1
             else:
                 self.op1_type = "label"
                 self.label = self.label.lower()
+
+        self.op2 = self.op2.lower()
 
         if self.op2:
             if self.op2.startswith("["):
@@ -242,7 +246,7 @@ class Assembler(object):
 
     def _io(self):
         self.verify_ops(self.op1 and self.op2)
-        if self.op1_type == 'imm' and (self.op2.lower() == 'in'):
+        if self.op1_type == 'imm' and (self.op2 == 'in'):
             self.write_error("Cannot read word into an immediate.")
         # 0x01 = 1
         opcode = 1
